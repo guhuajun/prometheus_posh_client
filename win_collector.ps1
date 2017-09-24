@@ -4,6 +4,8 @@
  # A powershell script for providing a general way to export metrics to prometheus
  #>
 
+Import-Module .\flancy.psd1
+
 function ConvertTo-PromExposition
 {
     [CmdletBinding()]
@@ -39,21 +41,30 @@ function ConvertTo-PromExposition
 
         $metric = $name + '{{hostname={0}, name="{1}"}}' -f @($hostname, $name)
         
-        $result1 = '#HELP {0}\n' -f $metric
-        $result2 = '#TYPE {0} gauge\n' -f $metric
-        $result3 = '{0}\n' -f $value
+        $result1 = '#HELP {0}' -f $metric
+        $result2 = '#TYPE {0} gauge' -f $metric
+        $result3 = '{0}' -f $value
 
-        $null = $results.Append($result1)
-        $null = $results.Append($result2)
-        $null = $results.Append($result3)
+        $null = $results.AppendLine($result1)
+        $null = $results.AppendLine($result2)
+        $null = $results.AppendLine($result3)
+
     }
 
     end
     {
-        return [System.String]::Join($results)
+        return $results.ToString()
     }
 }
 
-$metricItem = Get-Counter | Select-Object -ExpandProperty 'CounterSamples' | ConvertTo-PromExposition
 
-Write-Output $metricItem
+# New-Flancy -Url "http://localhost:9000" -Path $PSScriptRoot -WebSchema @(
+#     Get '/' {"Welcome to flancy!"}
+#     Get '/metrics' {
+#         $response = Get-Counter | Select-Object -ExpandProperty 'CounterSamples' | ConvertTo-PromExposition
+#         Write-Debug -Message $response
+#         Write-Output -InputObject $response
+#     }
+# )
+
+Get-Counter | Select-Object -ExpandProperty 'CounterSamples' | ConvertTo-PromExposition
