@@ -30,25 +30,30 @@ function ConvertTo-PromExposition
             $hostname = $path.split('\')[2]
             $path = $path -replace $hostname, ''
 
-            # Get instance name
+            # Get instance name from path then remove it
             $instanceName = $Sample.InstanceName.ToLower()
             $path = $path -replace $instanceName, ''
             
             # Make sure metric name is valid
             $pattern = '[a-zA-Z_:][a-zA-Z0-9_:]*'
-            $name = @()
-            [regex]::Matches($path, $pattern) | %{$name += $PSItem.Value}
-            $name = $name -join '_'
+            $metricNames = @()
+            [regex]::Matches($path, $pattern) | %{$metricNames += $PSItem.Value}
+            $metric = $metricNames -join '_'
+            $PSCmdlet.WriteVerbose('Metric name is {0}' -f $metric)
+
+            # Make sure instance name is valid
+            $instanceNames = @()
+            [regex]::Matches($instanceName, $pattern) | %{$instanceNames += $PSItem.Value}
+            $instanceName = $instanceNames -join '_'
+            $PSCmdlet.WriteVerbose('Instance name is {0}' -f $instanceName)
 
             # Get value
             $value = $Sample.CookedValue
-
-            $metric = $name + '{{instance="{0}"}}' -f $instanceName
-            
-            $result1 = "#HELP {0}`n" -f $name
+        
+            $result1 = "#HELP {0}`n" -f $metric
             $result2 = "#TYPE {0} gauge`n" -f $metric
-            $result3 = "{0}`n" -f $value
-
+            $result3 = "{0}{{host=`"{1}`", instance=`"{2}`"}} {3}`n" -f @(
+                $metric, $hostname, $instanceName, $value)
             $null = $results.Append($result1)
             $null = $results.Append($result2)
             $null = $results.Append($result3)            
@@ -61,8 +66,8 @@ function ConvertTo-PromExposition
 
     end
     {
-        return $results.ToString().Trim()
+        return $results.ToString()
     }
 }
 
-Export-ModuleMember -Function "ConvertTo-PromExposition"
+Export-ModuleMember -Function 'ConvertTo-PromExposition'
