@@ -39,6 +39,7 @@ function ConvertTo-PromExposition
             $metricNames = @()
             [regex]::Matches($path, $pattern) | %{$metricNames += $PSItem.Value}
             $metric = $metricNames -join '_'
+            $metric = 'windows_' + $metric
             $PSCmdlet.WriteVerbose('Metric name is {0}' -f $metric)
 
             # Make sure instance name is valid
