@@ -1,11 +1,32 @@
 # requires -version 5.0
 
 <#
- # A powershell script for providing a general way to export metrics to prometheus
+ # A powershell script module for providing a general way to export metrics to prometheus
+ # Author:  Huajun (Greg) Gu
+ # Version: 0.1
  #>
 
-function ConvertTo-PromExposition
+ function ConvertTo-PromExposition
 {
+    <#
+    .SYNOPSIS
+        A function to generate data that can be post to Prometheus PushGateway.
+    .DESCRIPTION
+        A function to generate data that can be post to Prometheus PushGateway.
+    .INPUTS
+        Microsoft.PowerShell.Commands.GetCounter.PerformanceCounterSample
+    .OUTPUTS
+        System.String
+    .LINK
+        https://prometheus.io/docs/instrumenting/exposition_formats/
+    .EXAMPLE
+        $metric = Get-Counter | Select-Object -ExpandProperty 'CounterSamples' | ?{$PSItem.InstanceName -match '[a-zA-Z_:][a-zA-Z0-9_:]*'}
+        $metric = $metric | ConvertTo-PromExposition
+        $response = Invoke-WebRequest -Uri "http://localhost:9091/metrics/job/pushgateway/" -Method Post -Body $metric
+    .NOTES
+        None
+    #>
+
     [CmdletBinding()]
     param(
         [Parameter(Mandatory=$true, ValueFromPipeline=$true)]
@@ -61,7 +82,7 @@ function ConvertTo-PromExposition
         }
         catch
         {
-            $PSCmdlet.WriteError($Error[0])
+            $PSCmdlet.WriteError($PSItem.Exception.ToString())
         }
     }
 
