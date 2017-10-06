@@ -3,10 +3,10 @@
 <#
  # A powershell script module for providing a general way to export metrics to prometheus
  # Author:  Huajun (Greg) Gu
- # Version: 0.1
+ # Version: 0.0.1
  #>
 
- function ConvertTo-PromExposition
+function ConvertTo-PromExposition
 {
     <#
     .SYNOPSIS

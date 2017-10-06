@@ -21,7 +21,6 @@ __NOTE__ You may use cmder (with Git for Windows, http://cmder.net/ or 7-zip) to
 http://docs.grafana.org/installation/windows/
 
 
-
 You can also read official documentation for more details.
 * https://prometheus.io/docs/introduction/getting_started/
 * https://github.com/prometheus/pushgateway
