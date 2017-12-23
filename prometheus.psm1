@@ -3,7 +3,7 @@
 <#
  # A powershell script module for providing a general way to export metrics to prometheus
  # Author:  Huajun (Greg) Gu
- # Version: 0.0.1
+ # Version: 0.0.2
  #>
 
 function ConvertTo-PromExposition
@@ -37,6 +37,7 @@ function ConvertTo-PromExposition
     begin
     {
         $results = New-Object System.Text.StringBuilder
+        $metrics = @()
     }
 
     process
@@ -72,12 +73,17 @@ function ConvertTo-PromExposition
             # Get value
             $value = $Sample.CookedValue
         
-            $result1 = "#HELP {0}`n" -f $metric
-            $result2 = "#TYPE {0} gauge`n" -f $metric
+            if ($metric -notin $metrics)
+            {
+                $metrics += $metric
+                $result1 = "#HELP {0}`n" -f $metric
+                $result2 = "#TYPE {0} gauge`n" -f $metric
+                $null = $results.Append($result1)
+                $null = $results.Append($result2)
+            }
+
             $result3 = "{0}{{host=`"{1}`", instance=`"{2}`"}} {3}`n" -f @(
                 $metric, $hostname, $instanceName, $value)
-            $null = $results.Append($result1)
-            $null = $results.Append($result2)
             $null = $results.Append($result3)            
         }
         catch
