@@ -1,0 +1,43 @@
+version: "3"
+
+services: 
+  prometheus:
+    image: prom/prometheus:v2.11.1
+    networks:
+      prom:
+        aliases:
+          - prometheus
+    ports:
+      - 9090:9090
+    volumes:
+      - ./prometheus/conf/prometheus.yml:/etc/prometheus/prometheus.yml
+
+  pushgateway:
+    image: prom/pushgateway:v1.0.0
+    networks:
+      prom:
+        aliases:
+          - pushgateway
+    ports:
+      - 9091:9091
+
+  grafana:
+    image: grafana/grafana:6.2.5
+    networks:
+      prom:
+    ports:
+      - 3000:3000
+    environment: 
+      - GF_ALERTING_ENABLED:false
+    volumes: 
+      - ./grafana/provisioning:/etc/grafana/provisioning
+    depends_on:
+     - prometheus
+     - pushgateway
+
+networks:
+  prom:
+    ipam:
+      driver: default
+      config:
+        - subnet: "172.25.0.0/24"

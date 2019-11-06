@@ -1,0 +1,12 @@
+# config file version
+# See full example: https://grafana.com/docs/administration/provisioning/#example-datasource-config-file
+apiVersion: 1
+
+datasources:
+- name: Prometheus
+  type: prometheus
+  access: proxy
+  orgId: 1
+  url: http://prometheus:9090
+  isDefault: true
+  editable: true
